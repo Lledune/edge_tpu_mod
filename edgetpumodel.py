@@ -266,5 +266,8 @@ class EdgeTPUModel:
                    json.dump(output, f, indent=1)
             if save_img:
               cv2.imwrite(output_path, output_image)
+              
+            cv2.imshow('frame', output_image)
+
             
         return det

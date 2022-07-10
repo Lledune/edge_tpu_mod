@@ -180,7 +180,7 @@ if __name__ == "__main__":
                 logger.error("Empty image received")
                 break
             else:
-                camera = make_camera(res, input_size[0], args.loop)
+                camera = make_camera(args.source, input_size[0], args.loop)
                 full_image, net_image, pad = get_image_tensor(image, input_size[0])
                 pred = model.forward(net_image)
                 

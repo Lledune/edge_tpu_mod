@@ -178,7 +178,7 @@ if __name__ == "__main__":
         with StreamingServer(camera, args.bitrate) as server:
             def render_overlay():
                 logger.info("No overlay sent")
-                #server.send_overlay(overlay)
+                server.send_overlay(overlay)
             
         
             while True:

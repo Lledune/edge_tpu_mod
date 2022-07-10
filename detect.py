@@ -195,7 +195,7 @@ if __name__ == "__main__":
                         server.send_overlay(overlay)
                         
                     camera.render_overlay = render_overlay
-                    signal.pause()
+                    #signal.pause()
                 
           except KeyboardInterrupt:
             break

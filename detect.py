@@ -192,7 +192,8 @@ if __name__ == "__main__":
                 
                 with StreamingServer(camera, args.bitrate) as server:
                     def render_overlay(tensor, layout, command):
-                        server.send_overlay(overlay)
+                        logger.info("No overlay sent")
+                        #server.send_overlay(overlay)
                         
                     camera.render_overlay = render_overlay
                     #signal.pause()

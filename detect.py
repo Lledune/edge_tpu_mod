@@ -168,7 +168,7 @@ if __name__ == "__main__":
         cam.release()
         
     elif args.server:
-        logger.info("Opening stream on device: {}".format(args.device))
+        logger.info("Opening server stream on device: {}".format(args.device))
         
         cam = cv2.VideoCapture(args.device)
         

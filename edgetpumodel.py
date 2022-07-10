@@ -270,4 +270,4 @@ class EdgeTPUModel:
             cv2.imshow('frame', output_image)
 
             
-        return det
+        return output_image

@@ -6,11 +6,17 @@ import time
 from pathlib import Path
 import glob
 import json
+import signal
 
 import numpy as np
 from tqdm import tqdm
 import cv2
 import yaml
+
+from .camera import make_camera
+from .gstreamer import Display, run_gen
+from .streaming.server import StreamingServer
+from . import svg
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,6 +39,14 @@ if __name__ == "__main__":
     parser.add_argument("--bench_coco", action='store_true', help="Process a stream")
     parser.add_argument("--coco_path", type=str, help="Path to COCO 2017 Val folder")
     parser.add_argument("--quiet","-q", action='store_true', help="Disable logging (except errors)")
+    parser.add_argument("--server", action='store_true', help="Process a stream and send to video server")
+    parser.add_argument('--source',
+                        help='/dev/videoN:FMT:WxH:N/D or .mp4 file or image file',
+                        default='/dev/video0:YUY2:640x480:30/1')
+    parser.add_argument('--loop', default=False, action='store_true',
+                        help='Loop input video file')
+    parser.add_argument('--bitrate', type=int, default=1000000,
+                        help='Video streaming bitrate (bit/s)')
         
     args = parser.parse_args()
     
@@ -143,6 +157,41 @@ if __name__ == "__main__":
                 
                 tinference, tnms = model.get_last_inference_time()
                 logger.info("Frame done in {}".format(tinference+tnms))
+          except KeyboardInterrupt:
+            break
+          
+        cam.release()
+        
+    elif args.server:
+        logger.info("Opening stream on device: {}".format(args.device))
+        
+        cam = cv2.VideoCapture(args.device)
+        
+        while True:
+          try:
+            res, image = cam.read()
+            
+            if res is False:
+                logger.error("Empty image received")
+                break
+            else:
+                camera = make_camera(res, input_size[0], args.loop)
+                full_image, net_image, pad = get_image_tensor(image, input_size[0])
+                pred = model.forward(net_image)
+                
+                overlay = model.process_predictions(pred[0], full_image, pad)
+                tinference, tnms = model.get_last_inference_time()
+                logger.info("Frame done in {}".format(tinference+tnms))
+                
+                assert camera is not None
+                
+                with StreamingServer(camera, args.bitrate) as server:
+                    def render_overlay(tensor, layout, command):
+                        server.send_overlay(overlay)
+                        
+                    camera.render_overlay = render_overlay
+                    signal.pause()
+                
           except KeyboardInterrupt:
             break
           

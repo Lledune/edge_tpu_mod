@@ -267,7 +267,7 @@ class EdgeTPUModel:
             if save_img:
               cv2.imwrite(output_path, output_image)
               
-            cv2.imshow('frame', output_image)
+            ##cv2.imshow('frame', output_image)
 
             
         return output_image

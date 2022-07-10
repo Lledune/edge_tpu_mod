@@ -13,6 +13,11 @@ from tqdm import tqdm
 import cv2
 import yaml
 
+#Import files#
+
+root = os.getcwd()
+sys.path.append(root)
+
 from .camera import make_camera
 from .gstreamer import Display, run_gen
 from .streaming.server import StreamingServer

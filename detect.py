@@ -172,6 +172,17 @@ if __name__ == "__main__":
         
         cam = cv2.VideoCapture(args.device)
         
+        camera = make_camera(args.source,(input_size[0], input_size[0]), args.loop)
+        assert camera is not None
+                
+        with StreamingServer(camera, args.bitrate) as server:
+            def render_overlay(tensor, layout, command):
+                logger.info("No overlay sent")
+                #server.send_overlay(overlay)
+                
+            camera.render_overlay = render_overlay
+            signal.pause()    
+        
         while True:
           try:
             res, image = cam.read()
@@ -180,7 +191,7 @@ if __name__ == "__main__":
                 logger.error("Empty image received")
                 break
             else:
-                camera = make_camera(args.source,(input_size[0], input_size[0]), args.loop)
+
                 full_image, net_image, pad = get_image_tensor(image, input_size[0])
                 pred = model.forward(net_image)
                 
@@ -188,15 +199,8 @@ if __name__ == "__main__":
                 tinference, tnms = model.get_last_inference_time()
                 logger.info("Frame done in {}".format(tinference+tnms))
                 
-                assert camera is not None
-                
-                with StreamingServer(camera, args.bitrate) as server:
-                    def render_overlay(tensor, layout, command):
-                        logger.info("No overlay sent")
-                        #server.send_overlay(overlay)
-                        
-                    camera.render_overlay = render_overlay
-                    signal.pause()
+
+            
                 
           except KeyboardInterrupt:
             break

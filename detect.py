@@ -21,7 +21,7 @@ sys.path.append(root)
 from camera import make_camera
 from gstreamer import Display, run_gen
 from streaming.server import StreamingServer
-#from . import svg
+import svg
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

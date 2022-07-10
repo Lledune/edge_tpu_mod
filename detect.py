@@ -176,36 +176,36 @@ if __name__ == "__main__":
         assert camera is not None
                 
         with StreamingServer(camera, args.bitrate) as server:
-            def render_overlay(tensor, layout, command):
+            def render_overlay():
                 logger.info("No overlay sent")
                 #server.send_overlay(overlay)
-                
-            camera.render_overlay = render_overlay
-            signal.pause()    
+            
         
-        while True:
-          try:
-            res, image = cam.read()
-            
-            if res is False:
-                logger.error("Empty image received")
+            while True:
+              try:
+                res, image = cam.read()
+                
+                if res is False:
+                    logger.error("Empty image received")
+                    break
+                else:
+    
+                    full_image, net_image, pad = get_image_tensor(image, input_size[0])
+                    pred = model.forward(net_image)
+                    
+                    overlay = model.process_predictions(pred[0], full_image, pad)
+                    tinference, tnms = model.get_last_inference_time()
+                    logger.info("Frame done in {}".format(tinference+tnms))
+                    camera.render_overlay = render_overlay 
+                    camera.render_overlay()
+    
+                
+                    
+              except KeyboardInterrupt:
                 break
-            else:
-
-                full_image, net_image, pad = get_image_tensor(image, input_size[0])
-                pred = model.forward(net_image)
-                
-                overlay = model.process_predictions(pred[0], full_image, pad)
-                tinference, tnms = model.get_last_inference_time()
-                logger.info("Frame done in {}".format(tinference+tnms))
-                
-
-            
-                
-          except KeyboardInterrupt:
-            break
-          
-        cam.release()
+              
+            cam.release()
+            signal.pause()
             
         
 

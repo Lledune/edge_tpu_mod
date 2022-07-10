@@ -18,7 +18,7 @@ import threading
 import gstreamer
 import pipelines
 
-from .gst import *
+from gst import *
 
 class Camera:
     def __init__(self, render_size, inference_size, loop):
